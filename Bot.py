@@ -3,31 +3,37 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ui import Select, View
 import datetime
-from keep_alive import keep_alive  # For Replit 24/7 hosting
-
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+from keep_alive import keep_alive  # Optional: remove if not hosting on Replit
 
+# Load .env file
 load_dotenv()
+
+# Load token
 TOKEN = os.getenv("DISCORD_TOKEN")
 
+# Constants
 GUILD_ID = 1399429188843259984
 MASS_SHIFT_CHANNEL_ID = 1399512109095714967
 INFRACTION_CHANNEL_ID = 1399477181138210887
 PROMOTE_DEMOTE_CHANNEL_ID = 1399487526460330004
 SDC_EMPLOYEE_ROLE_ID = 1399429189244944569
 
+# Set up bot
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 bot = commands.Bot(command_prefix="/", intents=intents)
 tree = bot.tree
 
+# Ready event
 @bot.event
 async def on_ready():
     await tree.sync(guild=discord.Object(id=GUILD_ID))
-    print(f"✅ Logged in as {bot.user}")
+    print(f"✅ Logged in as {bot.user}!")
 
+# /host_mass_shift command
 @tree.command(guild=discord.Object(id=GUILD_ID), name="host_mass_shift", description="Host a mass shift.")
 @app_commands.describe(
     host="Who's hosting?",
@@ -52,8 +58,10 @@ async def host_mass_shift(interaction: discord.Interaction, host: str, cohost: s
 
     thread = await message.create_thread(name="Mass Shift Discussion")
     await thread.send(f"**{description}**")
+
     await interaction.response.send_message("✅ Mass Shift announcement sent!", ephemeral=True)
 
+# /infract command
 @tree.command(guild=discord.Object(id=GUILD_ID), name="infract", description="Log an infraction")
 @app_commands.describe(
     employee="Tag the employee.",
@@ -75,6 +83,7 @@ async def infract(interaction: discord.Interaction, employee: discord.Member, re
     await channel.send(embed=embed)
     await interaction.response.send_message("✅ Infraction logged!", ephemeral=True)
 
+# /promote_demote command
 @tree.command(guild=discord.Object(id=GUILD_ID), name="promote_demote", description="Promote or demote an employee.")
 @app_commands.describe(
     member="Tag the member.",
@@ -102,5 +111,6 @@ async def promote_demote(interaction: discord.Interaction, member: discord.Membe
     await channel.send(embed=embed)
     await interaction.response.send_message(f"✅ {action.capitalize()} processed!", ephemeral=True)
 
-keep_alive()
+# Start bot
+keep_alive()  # Comment out if not using Replit
 bot.run(TOKEN)
